@@ -10,6 +10,18 @@ export class CalculPriceUsecase {
       reductionCode
     );
 
+    if (reduction.discountPercentage)
+      return this.applyPercentageDiscount(
+        this.additionPrices(products),
+        reduction?.discountPercentage
+      );
+
+    if (reduction.discountEuro)
+      return this.applyEuroDiscount(
+        this.additionPrices(products),
+        reduction?.discountEuro
+      );
+
     return this.additionPrices(products);
   }
 

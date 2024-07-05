@@ -4,13 +4,13 @@ import { ReductionGateway, ReductionType } from "../reduction.gateway";
 
 describe("Feature calcul basket", () => {
   let calculPriceUsecase: CalculPriceUsecase;
-  let reductionsGateway: ReductionGateway;
+  let reductionsGateway: StubReductionCodeGateway;
   beforeEach(() => {
     reductionsGateway = new StubReductionCodeGateway();
     calculPriceUsecase = new CalculPriceUsecase(reductionsGateway);
   });
 
-  describe.only("Calcul price for product", () => {
+  describe("Calcul price for product", () => {
     it("I have one product", async () => {
       const expectPrice = await calculPriceUsecase.handle(
         [
@@ -45,8 +45,13 @@ describe("Feature calcul basket", () => {
   });
 
   describe("Apply promotion code", () => {
-    it("Apply promotion of 30%", () => {
-      const expectPrice = calculPriceUsecase.handle(
+    it("Apply promotion of 30%", async () => {
+      givenReductionCodeExist({
+        code: "1",
+        discountPercentage: 10,
+      });
+
+      const expectPrice = await calculPriceUsecase.handle(
         [
           {
             price: 10,
@@ -55,7 +60,7 @@ describe("Feature calcul basket", () => {
             price: 10,
           },
         ],
-        ""
+        "1"
         // {
         //   discountPercentage: 10,
         // }
@@ -65,8 +70,12 @@ describe("Feature calcul basket", () => {
       expect(price).toBe(expectPrice);
     });
 
-    it("Promotion of 30€", () => {
-      const expectPrice = calculPriceUsecase.handle(
+    it.only("Promotion of 30€", async () => {
+      givenReductionCodeExist({
+        code: "1",
+        discountEuro: 10,
+      });
+      const expectPrice = await calculPriceUsecase.handle(
         [
           {
             price: 10,
@@ -75,17 +84,18 @@ describe("Feature calcul basket", () => {
             price: 10,
           },
         ],
-        ""
-        // {
-        //   discountEuro: 10,
-        // }
+        "1"
       );
 
       const price = 10;
       expect(price).toBe(expectPrice);
     });
-    it("Promotion of 30€ and price is 20€", () => {
-      const expectPrice = calculPriceUsecase.handle(
+    it("Promotion of 30€ and price is 20€", async () => {
+      givenReductionCodeExist({
+        code: "1",
+        discountEuro: 30,
+      });
+      const expectPrice = await calculPriceUsecase.handle(
         [
           {
             price: 10,
@@ -94,16 +104,38 @@ describe("Feature calcul basket", () => {
             price: 10,
           },
         ],
-        ""
-        // {
-        //   discountEuro: 30,
-        // }
+        "1"
+      );
+
+      const price = 0;
+      expect(price).toBe(expectPrice);
+    });
+
+    it("Promotion of one buy one free product ", async () => {
+      givenReductionCodeExist({
+        code: "1",
+        discountEuro: 30,
+      });
+      const expectPrice = await calculPriceUsecase.handle(
+        [
+          {
+            price: 10,
+          },
+          {
+            price: 10,
+          },
+        ],
+        "1"
       );
 
       const price = 0;
       expect(price).toBe(expectPrice);
     });
   });
+
+  function givenReductionCodeExist(reductionCode: ReductionType) {
+    reductionsGateway.reduction = reductionCode;
+  }
 });
 
 class StubReductionCodeGateway implements ReductionGateway {
