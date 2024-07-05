@@ -1,21 +1,16 @@
+import { ReductionGateway } from "./reduction.gateway";
+
 export class CalculPriceUsecase {
-  constructor() {}
-  handle(
+  constructor(private readonly reductionGateway: ReductionGateway) {}
+  async handle(
     products: { price: number }[],
-    {
-      discountPercentage = 0,
-      discountEuro = 0,
-    }: Partial<{ discountPercentage: number; discountEuro: number }>
-  ): number {
-    if (discountEuro > 0)
-      return this.applyEuroDiscount(
-        this.additionPrices(products),
-        discountEuro
-      );
-    return this.applyPercentageDiscount(
-      this.additionPrices(products),
-      discountPercentage
+    reductionCode: string
+  ): Promise<number> {
+    const reduction = await this.reductionGateway.getReductionByCode(
+      reductionCode
     );
+
+    return this.additionPrices(products);
   }
 
   private additionPrices(products: { price: number }[]): number {
@@ -28,6 +23,6 @@ export class CalculPriceUsecase {
   }
 
   applyEuroDiscount(price: number, discountInEuro: number): number {
-    return price - discountInEuro;
+    return Math.max(0, price - discountInEuro);
   }
 }

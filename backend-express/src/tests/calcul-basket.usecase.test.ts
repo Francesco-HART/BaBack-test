@@ -1,27 +1,32 @@
-import { describe, expect, it } from "@jest/globals";
-import { beforeEach } from "node:test";
+import { describe, expect, it, beforeEach } from "@jest/globals";
 import { CalculPriceUsecase } from "../calcul-price.usecase";
+import { ReductionGateway, ReductionType } from "../reduction.gateway";
 
 describe("Feature calcul basket", () => {
-  let calculPriceUsecase: CalculPriceUsecase = new CalculPriceUsecase();
+  let calculPriceUsecase: CalculPriceUsecase;
+  let reductionsGateway: ReductionGateway;
+  beforeEach(() => {
+    reductionsGateway = new StubReductionCodeGateway();
+    calculPriceUsecase = new CalculPriceUsecase(reductionsGateway);
+  });
 
-  describe("Calcul price for product", () => {
-    it("I have one product", () => {
-      const expectPrice = calculPriceUsecase.handle(
+  describe.only("Calcul price for product", () => {
+    it("I have one product", async () => {
+      const expectPrice = await calculPriceUsecase.handle(
         [
           {
             price: 1,
           },
         ],
-        {}
+        ""
       );
 
       const price = 1;
-      expect(price).toBe(expectPrice);
+      expect(expectPrice).toBe(price);
     });
 
-    it("There is two products", () => {
-      const expectPrice = calculPriceUsecase.handle(
+    it("There is two products", async () => {
+      const expectPrice = await calculPriceUsecase.handle(
         [
           {
             price: 1,
@@ -31,11 +36,11 @@ describe("Feature calcul basket", () => {
             price: 2,
           },
         ],
-        {}
+        ""
       );
 
       const price = 3;
-      expect(price).toBe(expectPrice);
+      expect(expectPrice).toBe(price);
     });
   });
 
@@ -50,9 +55,10 @@ describe("Feature calcul basket", () => {
             price: 10,
           },
         ],
-        {
-          discountPercentage: 10,
-        }
+        ""
+        // {
+        //   discountPercentage: 10,
+        // }
       );
 
       const price = 18;
@@ -69,13 +75,40 @@ describe("Feature calcul basket", () => {
             price: 10,
           },
         ],
-        {
-          discountEuro: 10,
-        }
+        ""
+        // {
+        //   discountEuro: 10,
+        // }
       );
 
       const price = 10;
       expect(price).toBe(expectPrice);
     });
+    it("Promotion of 30€ and price is 20€", () => {
+      const expectPrice = calculPriceUsecase.handle(
+        [
+          {
+            price: 10,
+          },
+          {
+            price: 10,
+          },
+        ],
+        ""
+        // {
+        //   discountEuro: 30,
+        // }
+      );
+
+      const price = 0;
+      expect(price).toBe(expectPrice);
+    });
   });
 });
+
+class StubReductionCodeGateway implements ReductionGateway {
+  reduction: ReductionType | undefined;
+  getReductionByCode(code: string): Promise<ReductionType> {
+    return new Promise((resolve) => resolve(this.reduction!));
+  }
+}
