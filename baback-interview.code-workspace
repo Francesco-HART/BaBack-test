@@ -1,0 +1,22 @@
+{
+  "folders": [
+	{
+		"name": "baback-interview",
+		"path": "."
+	},
+    {
+      "name": "baback-express",
+      "path": "./baback-express"
+    },
+    {
+      "name": "frontend",
+      "path": "./frontend"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "node_modules/": true
+    },
+	"jest.disabledWorkspaceFolders": ["ROOT", "frontend"]
+  },
+}
