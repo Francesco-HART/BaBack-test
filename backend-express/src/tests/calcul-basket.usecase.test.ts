@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach } from "@jest/globals";
 import { CalculPriceUsecase } from "../calcul-price.usecase";
 import { ReductionGateway, ReductionType } from "../reduction.gateway";
+import { productBuilder } from "../../product.builder";
 
 describe("Feature calcul basket", () => {
   let calculPriceUsecase: CalculPriceUsecase;
@@ -13,14 +14,7 @@ describe("Feature calcul basket", () => {
   describe("Calcul price for product", () => {
     it("I have one product", async () => {
       const expectPrice = await calculPriceUsecase.handle(
-        [
-          {
-            name: "product2",
-            quantity: 1,
-
-            price: 1,
-          },
-        ],
+        [new productBuilder().withQuantity(1).withPrice(1).build()],
         ""
       );
 
@@ -55,11 +49,11 @@ describe("Feature calcul basket", () => {
     it("There is two same products", async () => {
       const expectPrice = await calculPriceUsecase.handle(
         [
-          {
-            name: "product2",
-            quantity: 2,
-            price: 1,
-          },
+          new productBuilder()
+            .withName("product2")
+            .withQuantity(2)
+            .withPrice(1)
+            .build(),
         ],
         ""
       );
@@ -78,18 +72,9 @@ describe("Feature calcul basket", () => {
 
       const expectPrice = await calculPriceUsecase.handle(
         [
-          {
-            name: "product2",
-            quantity: 1,
+          new productBuilder().withName("product2").withPrice(10).build(),
 
-            price: 10,
-          },
-          {
-            name: "product2",
-            quantity: 1,
-
-            price: 10,
-          },
+          new productBuilder().withName("product2").withPrice(10).build(),
         ],
         "1"
         // {
@@ -101,25 +86,16 @@ describe("Feature calcul basket", () => {
       expect(price).toBe(expectPrice);
     });
 
-    it("Promotion of 30€", async () => {
+    it("Promotion of 10€", async () => {
       givenReductionCodeExist({
         code: "1",
         discountEuro: 10,
       });
       const expectPrice = await calculPriceUsecase.handle(
         [
-          {
-            name: "product2",
-            quantity: 1,
+          new productBuilder().withName("product1").withPrice(10).build(),
 
-            price: 10,
-          },
-          {
-            name: "product2",
-
-            quantity: 1,
-            price: 10,
-          },
+          new productBuilder().withName("product2").withPrice(10).build(),
         ],
         "1"
       );
@@ -134,18 +110,9 @@ describe("Feature calcul basket", () => {
       });
       const expectPrice = await calculPriceUsecase.handle(
         [
-          {
-            name: "product2",
-            quantity: 1,
+          new productBuilder().withName("product1").withPrice(10).build(),
 
-            price: 10,
-          },
-          {
-            name: "product2",
-            quantity: 1,
-
-            price: 10,
-          },
+          new productBuilder().withName("product2").withPrice(10).build(),
         ],
         "1"
       );
@@ -161,23 +128,31 @@ describe("Feature calcul basket", () => {
       });
       const expectPrice = await calculPriceUsecase.handle(
         [
-          {
-            name: "product1",
-            quantity: 1,
+          new productBuilder().withName("product1").withPrice(15).build(),
 
-            price: 15,
-          },
-          {
-            name: "product2",
-            quantity: 1,
-
-            price: 10,
-          },
+          new productBuilder().withName("product2").withPrice(10).build(),
         ],
         "1"
       );
 
       const price = 15;
+      expect(price).toBe(expectPrice);
+    });
+
+    it("Promotion of 10€ apply only for tshirt", async () => {
+      givenReductionCodeExist({
+        code: "1",
+        discountEuro: 10,
+      });
+      const expectPrice = await calculPriceUsecase.handle(
+        [
+          new productBuilder().withName("product1").withPrice(10).build(),
+          new productBuilder().withName("product2").withPrice(10).build(),
+        ],
+        "1"
+      );
+
+      const price = 10;
       expect(price).toBe(expectPrice);
     });
   });
