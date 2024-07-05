@@ -3,24 +3,30 @@ import { ReductionGateway } from "./reduction.gateway";
 export class CalculPriceUsecase {
   constructor(private readonly reductionGateway: ReductionGateway) {}
   async handle(
-    products: { price: number }[],
+    products: {
+      name: string;
+      price: number;
+    }[],
     reductionCode: string
   ): Promise<number> {
     const reduction = await this.reductionGateway.getReductionByCode(
       reductionCode
     );
 
-    if (reduction.discountPercentage)
+    if (reduction && reduction.discountPercentage)
       return this.applyPercentageDiscount(
         this.additionPrices(products),
         reduction?.discountPercentage
       );
 
-    if (reduction.discountEuro)
+    if (reduction && reduction.discountEuro)
       return this.applyEuroDiscount(
         this.additionPrices(products),
         reduction?.discountEuro
       );
+
+    if (reduction && reduction.freeProduct)
+      return this.applyFreeProduct(products);
 
     return this.additionPrices(products);
   }
@@ -36,5 +42,23 @@ export class CalculPriceUsecase {
 
   applyEuroDiscount(price: number, discountInEuro: number): number {
     return Math.max(0, price - discountInEuro);
+  }
+
+  findCheapestProduct(products: { price: number }[]): { price: number } | null {
+    if (products.length === 0) return null;
+    return products.reduce(
+      (cheapest, product) =>
+        product.price < cheapest.price ? product : cheapest,
+      products[0]
+    );
+  }
+
+  applyFreeProduct(products: { price: number }[]): number {
+    const total = this.additionPrices(products);
+    const cheapestProduct = this.findCheapestProduct(products);
+    if (cheapestProduct) {
+      return total - cheapestProduct.price;
+    }
+    return total;
   }
 }

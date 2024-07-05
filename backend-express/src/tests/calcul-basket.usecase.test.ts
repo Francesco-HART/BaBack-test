@@ -15,6 +15,8 @@ describe("Feature calcul basket", () => {
       const expectPrice = await calculPriceUsecase.handle(
         [
           {
+            name: "product2",
+
             price: 1,
           },
         ],
@@ -29,10 +31,14 @@ describe("Feature calcul basket", () => {
       const expectPrice = await calculPriceUsecase.handle(
         [
           {
+            name: "product2",
+
             price: 1,
           },
 
           {
+            name: "product2",
+
             price: 2,
           },
         ],
@@ -54,9 +60,13 @@ describe("Feature calcul basket", () => {
       const expectPrice = await calculPriceUsecase.handle(
         [
           {
+            name: "product2",
+
             price: 10,
           },
           {
+            name: "product2",
+
             price: 10,
           },
         ],
@@ -70,7 +80,7 @@ describe("Feature calcul basket", () => {
       expect(price).toBe(expectPrice);
     });
 
-    it.only("Promotion of 30€", async () => {
+    it("Promotion of 30€", async () => {
       givenReductionCodeExist({
         code: "1",
         discountEuro: 10,
@@ -78,9 +88,13 @@ describe("Feature calcul basket", () => {
       const expectPrice = await calculPriceUsecase.handle(
         [
           {
+            name: "product2",
+
             price: 10,
           },
           {
+            name: "product2",
+
             price: 10,
           },
         ],
@@ -98,9 +112,13 @@ describe("Feature calcul basket", () => {
       const expectPrice = await calculPriceUsecase.handle(
         [
           {
+            name: "product2",
+
             price: 10,
           },
           {
+            name: "product2",
+
             price: 10,
           },
         ],
@@ -114,21 +132,24 @@ describe("Feature calcul basket", () => {
     it("Promotion of one buy one free product ", async () => {
       givenReductionCodeExist({
         code: "1",
-        discountEuro: 30,
+        freeProduct: true,
       });
       const expectPrice = await calculPriceUsecase.handle(
         [
           {
-            price: 10,
+            name: "product1",
+            price: 15,
           },
           {
+            name: "product2",
+
             price: 10,
           },
         ],
         "1"
       );
 
-      const price = 0;
+      const price = 15;
       expect(price).toBe(expectPrice);
     });
   });

@@ -6,4 +6,5 @@ export type ReductionType = {
   code: string;
   discountEuro?: number;
   discountPercentage?: number;
+  freeProduct?: boolean;
 };
