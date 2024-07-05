@@ -5,6 +5,7 @@ export class CalculPriceUsecase {
   async handle(
     products: {
       name: string;
+      quantity: number;
       price: number;
     }[],
     reductionCode: string
@@ -31,8 +32,13 @@ export class CalculPriceUsecase {
     return this.additionPrices(products);
   }
 
-  private additionPrices(products: { price: number }[]): number {
-    return products.reduce((total, product) => total + product.price, 0);
+  private additionPrices(
+    products: { price: number; quantity: number }[]
+  ): number {
+    return products.reduce(
+      (total, product) => total + product.price * product.quantity,
+      0
+    );
   }
 
   applyPercentageDiscount(price: number, discountPercentage: number): number {
@@ -44,7 +50,9 @@ export class CalculPriceUsecase {
     return Math.max(0, price - discountInEuro);
   }
 
-  findCheapestProduct(products: { price: number }[]): { price: number } | null {
+  findCheapestProduct(
+    products: { price: number; quantity: number }[]
+  ): { price: number } | null {
     if (products.length === 0) return null;
     return products.reduce(
       (cheapest, product) =>
@@ -53,7 +61,7 @@ export class CalculPriceUsecase {
     );
   }
 
-  applyFreeProduct(products: { price: number }[]): number {
+  applyFreeProduct(products: { price: number; quantity: number }[]): number {
     const total = this.additionPrices(products);
     const cheapestProduct = this.findCheapestProduct(products);
     if (cheapestProduct) {

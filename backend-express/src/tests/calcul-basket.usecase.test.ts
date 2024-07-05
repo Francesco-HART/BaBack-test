@@ -16,6 +16,7 @@ describe("Feature calcul basket", () => {
         [
           {
             name: "product2",
+            quantity: 1,
 
             price: 1,
           },
@@ -32,12 +33,14 @@ describe("Feature calcul basket", () => {
         [
           {
             name: "product2",
+            quantity: 1,
 
             price: 1,
           },
 
           {
             name: "product2",
+            quantity: 1,
 
             price: 2,
           },
@@ -46,6 +49,22 @@ describe("Feature calcul basket", () => {
       );
 
       const price = 3;
+      expect(expectPrice).toBe(price);
+    });
+
+    it("There is two same products", async () => {
+      const expectPrice = await calculPriceUsecase.handle(
+        [
+          {
+            name: "product2",
+            quantity: 2,
+            price: 1,
+          },
+        ],
+        ""
+      );
+
+      const price = 2;
       expect(expectPrice).toBe(price);
     });
   });
@@ -61,11 +80,13 @@ describe("Feature calcul basket", () => {
         [
           {
             name: "product2",
+            quantity: 1,
 
             price: 10,
           },
           {
             name: "product2",
+            quantity: 1,
 
             price: 10,
           },
@@ -89,12 +110,14 @@ describe("Feature calcul basket", () => {
         [
           {
             name: "product2",
+            quantity: 1,
 
             price: 10,
           },
           {
             name: "product2",
 
+            quantity: 1,
             price: 10,
           },
         ],
@@ -113,11 +136,13 @@ describe("Feature calcul basket", () => {
         [
           {
             name: "product2",
+            quantity: 1,
 
             price: 10,
           },
           {
             name: "product2",
+            quantity: 1,
 
             price: 10,
           },
@@ -138,10 +163,13 @@ describe("Feature calcul basket", () => {
         [
           {
             name: "product1",
+            quantity: 1,
+
             price: 15,
           },
           {
             name: "product2",
+            quantity: 1,
 
             price: 10,
           },
