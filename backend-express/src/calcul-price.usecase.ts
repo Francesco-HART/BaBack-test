@@ -1,4 +1,8 @@
-import { ReductionGateway } from "./reduction.gateway";
+import {
+  ProductsType,
+  ReductionGateway,
+  ReductionType,
+} from "./reduction.gateway";
 
 export class CalculPriceUsecase {
   constructor(private readonly reductionGateway: ReductionGateway) {}
@@ -6,6 +10,7 @@ export class CalculPriceUsecase {
     products: {
       name: string;
       quantity: number;
+      type: ProductsType;
       price: number;
     }[],
     reductionCode: string
@@ -13,6 +18,14 @@ export class CalculPriceUsecase {
     const reduction = await this.reductionGateway.getReductionByCode(
       reductionCode
     );
+
+    if (reduction && reduction.productType && reduction.discountPercentage) {
+      return this.applyreductionForSpecifyProduct(
+        products,
+        reduction.productType,
+        reduction.discountPercentage
+      );
+    }
 
     if (reduction && reduction.discountPercentage)
       return this.applyPercentageDiscount(
@@ -30,6 +43,33 @@ export class CalculPriceUsecase {
       return this.applyFreeProduct(products);
 
     return this.additionPrices(products);
+  }
+
+  private applyreductionForSpecifyProduct(
+    products: {
+      name: string;
+      quantity: number;
+      type: ProductsType;
+      price: number;
+    }[],
+
+    productTypeReduction: ProductsType,
+    discountPercentage: number
+  ) {
+    let productsSameType = products.filter(
+      (product) => product.type === productTypeReduction
+    );
+
+    let productNotSameType = products.filter(
+      (product) => product.type !== productTypeReduction
+    );
+
+    let productSameTypeReduction = this.applyPercentageDiscount(
+      this.additionPrices(productsSameType),
+      discountPercentage
+    );
+
+    return this.additionPrices(productNotSameType) + productSameTypeReduction;
   }
 
   private additionPrices(

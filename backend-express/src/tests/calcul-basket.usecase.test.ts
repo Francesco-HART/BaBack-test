@@ -1,6 +1,10 @@
 import { describe, expect, it, beforeEach } from "@jest/globals";
 import { CalculPriceUsecase } from "../calcul-price.usecase";
-import { ReductionGateway, ReductionType } from "../reduction.gateway";
+import {
+  ProductsType,
+  ReductionGateway,
+  ReductionType,
+} from "../reduction.gateway";
 import { productBuilder } from "../../product.builder";
 
 describe("Feature calcul basket", () => {
@@ -25,19 +29,17 @@ describe("Feature calcul basket", () => {
     it("There is two products", async () => {
       const expectPrice = await calculPriceUsecase.handle(
         [
-          {
-            name: "product2",
-            quantity: 1,
+          new productBuilder()
+            .withName("product1")
+            .withQuantity(1)
+            .withPrice(1)
+            .build(),
 
-            price: 1,
-          },
-
-          {
-            name: "product2",
-            quantity: 1,
-
-            price: 2,
-          },
+          new productBuilder()
+            .withName("product2")
+            .withQuantity(1)
+            .withPrice(2)
+            .build(),
         ],
         ""
       );
@@ -139,20 +141,29 @@ describe("Feature calcul basket", () => {
       expect(price).toBe(expectPrice);
     });
 
-    it("Promotion of 10€ apply only for tshirt", async () => {
+    it("Promotion of 10% apply only for tshirt", async () => {
       givenReductionCodeExist({
         code: "1",
-        discountEuro: 10,
+        discountPercentage: 10,
+        productType: ProductsType.TSHIRT,
       });
       const expectPrice = await calculPriceUsecase.handle(
         [
-          new productBuilder().withName("product1").withPrice(10).build(),
-          new productBuilder().withName("product2").withPrice(10).build(),
+          new productBuilder()
+            .withName("product1")
+            .withType(ProductsType.PULL)
+            .withPrice(10)
+            .build(),
+          new productBuilder()
+            .withName("product2")
+            .withType(ProductsType.TSHIRT)
+            .withPrice(10)
+            .build(),
         ],
         "1"
       );
 
-      const price = 10;
+      const price = 19;
       expect(price).toBe(expectPrice);
     });
   });
