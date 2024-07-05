@@ -8,6 +8,7 @@ export type ReductionType = {
   discountPercentage?: number;
   freeProduct?: boolean;
   productType?: ProductsType;
+  reductionPrice?: number;
 };
 
 export enum ProductsType {

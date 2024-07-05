@@ -19,6 +19,12 @@ export class CalculPriceUsecase {
       reductionCode
     );
 
+    if (reduction && reduction.reductionPrice) {
+      let price = this.additionPrices(products);
+      if (reduction.reductionPrice > price) return price;
+      return this.applyPercentageDiscount(price, reduction.reductionPrice);
+    }
+
     if (reduction && reduction.productType && reduction.discountPercentage) {
       return this.applyreductionForSpecifyProduct(
         products,

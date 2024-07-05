@@ -166,6 +166,32 @@ describe("Feature calcul basket", () => {
       const price = 19;
       expect(price).toBe(expectPrice);
     });
+
+    it("Promotion of 10% for 30€ order", async () => {
+      givenReductionCodeExist({
+        code: "1",
+        discountPercentage: 10,
+        reductionPrice: 30,
+      });
+      const expectPrice = await calculPriceUsecase.handle(
+        [
+          new productBuilder()
+            .withName("product1")
+            .withType(ProductsType.PULL)
+            .withPrice(10)
+            .build(),
+          new productBuilder()
+            .withName("product2")
+            .withType(ProductsType.TSHIRT)
+            .withPrice(10)
+            .build(),
+        ],
+        "1"
+      );
+
+      const price = 20;
+      expect(price).toBe(expectPrice);
+    });
   });
 
   function givenReductionCodeExist(reductionCode: ReductionType) {
